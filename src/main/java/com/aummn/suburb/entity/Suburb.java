@@ -6,6 +6,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Suburb domain object representing a Suburb.
+ *
+ * @author James Jin
+ *
+ */
 @Entity
 @Table(name = "suburb")
 @Getter
