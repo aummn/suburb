@@ -2,6 +2,7 @@ package com.aummn.suburb.entity;
 
 import javax.persistence.*;
 
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ApiModel(description="All details about the Suburb. ")
 public class Suburb {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

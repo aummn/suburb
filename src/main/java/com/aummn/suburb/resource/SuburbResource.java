@@ -10,6 +10,7 @@ import com.aummn.suburb.validator.SuburbValidator;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.BeanUtils;
@@ -43,6 +44,8 @@ public class SuburbResource {
             value = "/postcode/{postcode}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+	@ApiOperation(value = "Find Suburb details by a post code",
+    notes = "some Suburbs share the same post code, return a list available suburbs")
     public Single<ResponseEntity<BaseWebResponse<List<SuburbWebResponse>>>> getSuburbDetailByPostcode(@PathVariable(value = "postcode") String postcode) {
     	log.debug("getSuburbDetailByPostcode() with postcode : {}", postcode); 
     	boolean isValid = SuburbValidator.validatePostcode(postcode).isValid();
@@ -68,6 +71,8 @@ public class SuburbResource {
             value = "/name/{name}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+	@ApiOperation(value = "Find post codes by a Suburb name",
+    notes = "some Suburbs have 2 or more post codes, this API returns a list available post codes corresponding to the input Suburb name")
     public Single<ResponseEntity<BaseWebResponse<List<String>>>> getSuburbDetailByName(@PathVariable(value = "name") String name) {
     	log.debug("getSuburbDetailByName() with name : {}", name); 
     	boolean isValid = SuburbValidator.validateSuburbName(name).isValid();
@@ -92,7 +97,10 @@ public class SuburbResource {
     		 value = "/add",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
-    ) public Single<ResponseEntity<BaseWebResponse>> addSuburb(
+    ) 
+	@ApiOperation(value = "Create a Suburb entry",
+    notes = "return 201 if successfully created")
+    public Single<ResponseEntity<BaseWebResponse>> addSuburb(
         @RequestBody @Valid SuburbWebRequest suburbWebRequest) {
         return suburbService.addSuburb(toSuburbServiceRequest(suburbWebRequest)).subscribeOn(Schedulers.io()).map(
             s -> ResponseEntity.created(URI.create("/api/suburb/name/" + suburbWebRequest.getName()))
