@@ -37,7 +37,7 @@ public class SuburbServiceImplTest {
 
     @Test
     public void givenANewSuburb_wehnAddSuburb_thenReturnSingleOfAddedSuburbId() {
-        when(suburbRepository.findByNameAndPostcode(anyString(), anyString()))
+        when(suburbRepository.findByNameAndPostcodeIgnoreCase(anyString(), anyString()))
                 .thenReturn(Optional.empty());
         when(suburbRepository.save(any(Suburb.class)))
                 .thenReturn(new Suburb(1L, "Southbank", "3006"));
@@ -50,13 +50,13 @@ public class SuburbServiceImplTest {
                 .awaitTerminalEvent();
 
         InOrder inOrder = inOrder(suburbRepository);
-        inOrder.verify(suburbRepository, times(1)).findByNameAndPostcode(anyString(), anyString());
+        inOrder.verify(suburbRepository, times(1)).findByNameAndPostcodeIgnoreCase(anyString(), anyString());
         inOrder.verify(suburbRepository, times(1)).save(any(Suburb.class));
     }
 
     @Test
     public void givenAnExistingSuburb_whenAddSuburb_andWithSamePostcode_thenThrowSuburbExistsException() {
-        when(suburbRepository.findByNameAndPostcode(anyString(), anyString()))
+        when(suburbRepository.findByNameAndPostcodeIgnoreCase(anyString(), anyString()))
                 .thenReturn(Optional.of(new Suburb(1L, "Southbank", "3006")));
 
         suburbService.addSuburb(new SuburbServiceRequest("Southbank", "3006"))
@@ -66,7 +66,7 @@ public class SuburbServiceImplTest {
                 .awaitTerminalEvent();
 
         InOrder inOrder = inOrder(suburbRepository);
-        inOrder.verify(suburbRepository, times(1)).findByNameAndPostcode(anyString(), anyString());
+        inOrder.verify(suburbRepository, times(1)).findByNameAndPostcodeIgnoreCase(anyString(), anyString());
         inOrder.verify(suburbRepository, never()).save(any(Suburb.class));
     }
 
@@ -113,7 +113,7 @@ public class SuburbServiceImplTest {
     
     @Test
     public void givenASuburbName_whenGetSuburbDetailByName_SuburbNotFound_thenThrowSuburbNotFoundException() {
-        when(suburbRepository.findByName(anyString()))
+        when(suburbRepository.findByNameIgnoreCase(anyString()))
                 .thenReturn(Collections.emptyList());
 
         suburbService.getSuburbDetailByName("Southbank")
@@ -122,7 +122,7 @@ public class SuburbServiceImplTest {
                 .assertError(SuburbNotFoundException.class)
                 .awaitTerminalEvent();
 
-        verify(suburbRepository, times(1)).findByName(anyString());
+        verify(suburbRepository, times(1)).findByNameIgnoreCase(anyString());
     }
     
     @Test
@@ -138,7 +138,7 @@ public class SuburbServiceImplTest {
         List<SuburbServiceResponse> dtos = Arrays.asList(s1dto, s2dto, s3dto);
         
     	
-    	when(suburbRepository.findByName(anyString()))
+    	when(suburbRepository.findByNameIgnoreCase(anyString()))
                 .thenReturn(suburbs);
 
         suburbService.getSuburbDetailByName("Carlton")
@@ -148,7 +148,40 @@ public class SuburbServiceImplTest {
                 .assertValues(dtos)
                 .awaitTerminalEvent();
 
-        verify(suburbRepository, times(1)).findByName(anyString());
+        verify(suburbRepository, times(1)).findByNameIgnoreCase(anyString());
+
+    }
+    
+    @Test
+    public void givenASuburbId_whenGetSuburbById_SuburbNotFound_thenThrowSuburbNotFoundException() {
+        when(suburbRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+
+        suburbService.getSuburbById(1L)
+                .test()
+                .assertNotComplete()
+                .assertError(SuburbNotFoundException.class)
+                .awaitTerminalEvent();
+
+        verify(suburbRepository, times(1)).findById(anyLong());
+    }
+    
+    @Test
+    public void givenASuburbId_whenGetSuburbById_SuburbFound_thenReturnSuburb() {
+        Suburb s1 = new Suburb(1L, "Southbank", "3006");
+        SuburbServiceResponse s1dto = new SuburbServiceResponse(1L, "Southbank", "3006");       
+    	
+    	when(suburbRepository.findById(anyLong()))
+                .thenReturn(Optional.of(s1));
+
+        suburbService.getSuburbById(1L)
+                .test()
+                .assertComplete()
+                .assertNoErrors()
+                .assertValue(s1dto)
+                .awaitTerminalEvent();
+
+        verify(suburbRepository, times(1)).findById(anyLong());
 
     }    
     

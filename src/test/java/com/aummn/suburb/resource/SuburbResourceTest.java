@@ -189,4 +189,41 @@ public class SuburbResourceTest {
         verify(suburbService, times(1)).getSuburbDetailByName(anyString());
     }
 
+    @Test
+    public void givenASuburbId_whenGetSuburbDetailById_andGetSuburb_thenReturn200WithSuburbWebResponses() throws Exception {
+        
+        SuburbServiceResponse s1dto = new SuburbServiceResponse(123456L, "Southbank", "3006");
+
+    	when(suburbService.getSuburbById(anyLong()))
+                .thenReturn(Single.just(s1dto));
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/id/123456")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.error", nullValue()))
+                .andExpect(jsonPath("$.data.id", equalTo(123456)));
+
+        verify(suburbService, times(1)).getSuburbById(anyLong());
+    }
+    
+    @Test
+    public void givenASuburbId_whenGetSuburbDetailById_andSuburbNotFound_thenReturn404SuburbNotFound() throws Exception {
+        when(suburbService.getSuburbById(anyLong()))
+                .thenReturn(Single.error(new SuburbNotFoundException("suburb with id [123456] not found")));
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/id/123456")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status", equalTo(404)))
+                .andExpect(jsonPath("$.message", equalTo("suburb with id [123456] not found")));
+
+        verify(suburbService, times(1)).getSuburbById(anyLong());
+    }
+    
 }

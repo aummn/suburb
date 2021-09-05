@@ -1,5 +1,6 @@
 package com.aummn.suburb.service;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +47,7 @@ public class SuburbServiceImpl implements SuburbService {
     @Override
     public Single<List<SuburbServiceResponse>> getSuburbDetailByPostcode(String postcode) {
         return findSuburbDetailByPostcode(postcode)
-                .map(this::toSuburbServiceResponseDTOList);
+                .map(this::toSuburbServiceResponseList);
     }
 
     private Single<List<Suburb>> findSuburbDetailByPostcode(String postcode) {
@@ -74,12 +75,12 @@ public class SuburbServiceImpl implements SuburbService {
     @Override
     public Single<List<SuburbServiceResponse>> getSuburbDetailByName(String name) {
         return findSuburbDetailByName(name)
-                .map(this::toSuburbServiceResponseDTOList);
+                .map(this::toSuburbServiceResponseList);
     }
 
     private Single<List<Suburb>> findSuburbDetailByName(String name) {
         return Single.create(singleSubscriber -> {
-            List<Suburb> suburbs = suburbRepository.findByName(name);
+            List<Suburb> suburbs = suburbRepository.findByNameIgnoreCase(name);
             if(suburbs.isEmpty()) {
             	String errorMsg = new StringBuilder().append("suburb with name [").append(name).append("] not found").toString();
             	singleSubscriber.onError(new SuburbNotFoundException(errorMsg));
@@ -90,19 +91,47 @@ public class SuburbServiceImpl implements SuburbService {
         });
     }
     
-    private List<SuburbServiceResponse> toSuburbServiceResponseDTOList(List<Suburb> suburbs) {
+    private List<SuburbServiceResponse> toSuburbServiceResponseList(List<Suburb> suburbs) {
         return suburbs
                 .stream()
-                .map(this::toSuburbServiceResponseDTO)
+                .map(this::toSuburbServiceResponse)
                 .collect(Collectors.toList());
     }
 
-    private SuburbServiceResponse toSuburbServiceResponseDTO(Suburb suburb) {
+    private SuburbServiceResponse toSuburbServiceResponse(Suburb suburb) {
         SuburbServiceResponse suburbServiceResponseDTO = new SuburbServiceResponse();
         BeanUtils.copyProperties(suburb, suburbServiceResponseDTO);
         return suburbServiceResponseDTO;
     }
 	
+    /**
+     * Get Suburb details by id
+     * 
+     * @param id the id of a suburb
+     * 
+     * @return suburb info if found 
+     * 
+     * @throws SuburbNotFoundException if the corresponding suburb not found
+     * 
+     */
+    @Override
+    public Single<SuburbServiceResponse> getSuburbById(Long id) {
+        return findSuburbDetailById(id)
+                .map(this::toSuburbServiceResponse);
+    }
+
+    private Single<Suburb> findSuburbDetailById(Long id) {
+        return Single.create(singleSubscriber -> {
+        	Optional<Suburb> suburbOptional = suburbRepository.findById(id);
+            if(!suburbOptional.isPresent()) {
+            	String errorMsg = new StringBuilder().append("suburb with id [").append(id).append("] not found").toString();
+            	singleSubscriber.onError(new SuburbNotFoundException(errorMsg));
+            } else {
+            	singleSubscriber.onSuccess(suburbOptional.get());
+            }
+        });
+    }
+    
     /**
      * add a suburb
      * 
@@ -120,7 +149,7 @@ public class SuburbServiceImpl implements SuburbService {
 
     private Single<Long> saveSuburbToRepository(SuburbServiceRequest suburbServiceRequest) {
         return Single.create(singleSubscriber -> {
-            Optional<Suburb> suburbOptional = suburbRepository.findByNameAndPostcode(suburbServiceRequest.getName(), suburbServiceRequest.getPostcode());
+            Optional<Suburb> suburbOptional = suburbRepository.findByNameAndPostcodeIgnoreCase(suburbServiceRequest.getName(), suburbServiceRequest.getPostcode());
             // throw error if suburb entry exists already
             if (suburbOptional.isPresent())
                 singleSubscriber.onError(new SuburbExistsException());

@@ -34,7 +34,9 @@ public interface SuburbRepository extends JpaRepository<Suburb, Long> {
 
     List<Suburb> findByPostcode(String postcode);
 
-    List<Suburb> findByName(String name);
+    List<Suburb> findByNameIgnoreCase(String name);
     
-    Optional<Suburb> findByNameAndPostcode(String name, String postcode);
+    Optional<Suburb> findByNameAndPostcodeIgnoreCase(String name, String postcode);
+    
+    Optional<Suburb> findById(Long id);
 }

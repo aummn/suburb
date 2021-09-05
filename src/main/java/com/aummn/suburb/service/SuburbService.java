@@ -1,9 +1,10 @@
 package com.aummn.suburb.service;
 
-import com.aummn.suburb.resource.dto.request.SuburbWebRequest;
+import com.aummn.suburb.entity.Suburb;
 import com.aummn.suburb.service.dto.request.SuburbServiceRequest;
 import com.aummn.suburb.service.dto.response.SuburbServiceResponse;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 import java.util.List;
@@ -21,4 +22,5 @@ public interface SuburbService {
 
     Single<List<SuburbServiceResponse>> getSuburbDetailByName(String name);
 
+    Single<SuburbServiceResponse> getSuburbById(Long id);
 }

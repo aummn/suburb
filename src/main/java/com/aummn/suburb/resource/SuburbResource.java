@@ -94,6 +94,31 @@ public class SuburbResource {
     	}).collect(Collectors.toList());
     }
     
+    @GetMapping(
+            value = "/id/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+	@ApiOperation(value = "Find suburb by id",
+    notes = "a Suburb has a unique id")
+    public Single<ResponseEntity<BaseWebResponse<SuburbWebResponse>>> getSuburbDetailById(@PathVariable(value = "id") Long id) {
+    	log.debug("getSuburbDetailById() with id : {}", id); 
+    	boolean isValid = SuburbValidator.validateSuburbId(id).isValid();
+    	if(!isValid) {
+    		String errorMsg = String.format("invalid id - %s", id);
+    		throw new IllegalArgumentException(errorMsg);
+    	}
+        return suburbService.getSuburbById(id)
+                .subscribeOn(Schedulers.io())
+                .map(suburbServiceResponse -> ResponseEntity.ok(BaseWebResponse.successWithData(toSuburbWebResponse(suburbServiceResponse))));
+    }
+    
+    private SuburbWebResponse toSuburbWebResponse(SuburbServiceResponse suburbServiceResponse) {
+        	SuburbWebResponse suburbWebResponse = new SuburbWebResponse();
+            BeanUtils.copyProperties(suburbServiceResponse, suburbWebResponse);
+            return suburbWebResponse;
+    }
+    
+    
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(
     		 value = "/add",
