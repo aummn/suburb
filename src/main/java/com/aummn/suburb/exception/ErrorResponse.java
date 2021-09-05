@@ -1,6 +1,7 @@
 package com.aummn.suburb.exception;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -17,5 +18,6 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
     private int status;
     private String message;
+    private List<String> errors;
 
 }
