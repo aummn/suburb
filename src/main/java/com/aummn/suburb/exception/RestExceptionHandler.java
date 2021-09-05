@@ -2,6 +2,7 @@ package com.aummn.suburb.exception;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -34,31 +35,36 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(SuburbNotFoundException.class)
 	public ResponseEntity<ErrorResponse> handleSuburbNotFoundException(SuburbNotFoundException snfe) {
 		log.error(ExceptionUtils.getStackTrace(snfe));
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.NOT_FOUND.value()).message(snfe.getMessage()).build());
+		String msg = Optional.ofNullable(snfe.getMessage()).orElse("Suburb not found");
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.NOT_FOUND.value()).message(msg).build());
 	}
 
 	@ExceptionHandler(SuburbExistsException.class)
 	public ResponseEntity<ErrorResponse> handleSuburbExistsException(SuburbExistsException see) {
 		log.error(ExceptionUtils.getStackTrace(see));
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.CONFLICT.value()).message(see.getMessage()).build());
+		String msg = Optional.ofNullable(see.getMessage()).orElse("Suburb exists");
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.CONFLICT.value()).message(msg).build());
 	}
 	
 	@ExceptionHandler(AccessDeniedException.class)
 	public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ade) {
 		log.error(ExceptionUtils.getStackTrace(ade));
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.FORBIDDEN.value()).message(ade.getMessage()).build());
+		String msg = Optional.ofNullable(ade.getMessage()).orElse("Access denied");
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.FORBIDDEN.value()).message(msg).build());
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException iae) {
 		log.error(ExceptionUtils.getStackTrace(iae));
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(iae.getMessage()).build());
+		String msg = Optional.ofNullable(iae.getMessage()).orElse("Invalid argument");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(msg).build());
 	}
 	
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ErrorResponse> constraintViolationException(ConstraintViolationException cve) {
 		log.error(ExceptionUtils.getStackTrace(cve));
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(cve.getMessage()).build());
+		String msg = Optional.ofNullable(cve.getMessage()).orElse("Constraint violation");
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(msg).build());
 	}
 	
 	@Override
@@ -76,7 +82,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		StringBuilder errorSB = new StringBuilder();
 		errors.stream().forEach(error -> errorSB.append(error).append(" "));
 	    
-		ErrorResponse errorResponse = ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(errorSB.toString()).build();
+		String msg = Optional.ofNullable(errorSB.toString()).orElse("Method argument not valid");
+		ErrorResponse errorResponse = ErrorResponse.builder().timestamp(LocalDateTime.now()).status(HttpStatus.BAD_REQUEST.value()).message(msg).build();
 		return new ResponseEntity<>(errorResponse, headers, status);
 	}
 
