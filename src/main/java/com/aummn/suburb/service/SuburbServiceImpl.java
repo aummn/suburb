@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aummn.suburb.entity.Suburb;
+import com.aummn.suburb.exception.SuburbExistsException;
+import com.aummn.suburb.exception.SuburbNotFoundException;
 import com.aummn.suburb.repo.SuburbRepository;
 import com.aummn.suburb.resource.dto.request.SuburbWebRequestDTO;
 import com.aummn.suburb.service.dto.response.SuburbServiceResponseDTO;
@@ -14,8 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
 
 /**
  * The Suburb service implementation class for retrieving suburb info from back-end repository.
@@ -37,7 +37,7 @@ public class SuburbServiceImpl implements SuburbService {
      * 
      * @return a list containing suburb info
      * 
-     * @throws EntityNotFoundException if the corresponding suburb not found
+     * @throws SuburbNotFoundException if the corresponding suburb not found
      * 
      */
     @Override
@@ -50,7 +50,8 @@ public class SuburbServiceImpl implements SuburbService {
         return Single.create(singleSubscriber -> {
             List<Suburb> suburbs = suburbRepository.findByPostcode(postcode);
             if(suburbs.isEmpty()) {
-            	singleSubscriber.onError(new EntityNotFoundException());
+            	String errorMsg = new StringBuilder().append("suburb with postcode [").append(postcode).append("] not found").toString();
+            	singleSubscriber.onError(new SuburbNotFoundException(errorMsg));
             } else {
             	singleSubscriber.onSuccess(suburbs);
             }
@@ -64,7 +65,7 @@ public class SuburbServiceImpl implements SuburbService {
      * 
      * @return a list containing suburb info
      * 
-     * @throws EntityNotFoundException if the corresponding suburb not found
+     * @throws SuburbNotFoundException if the corresponding suburb not found
      * 
      */
     @Override
@@ -77,7 +78,8 @@ public class SuburbServiceImpl implements SuburbService {
         return Single.create(singleSubscriber -> {
             List<Suburb> suburbs = suburbRepository.findByName(name);
             if(suburbs.isEmpty()) {
-            	singleSubscriber.onError(new EntityNotFoundException());
+            	String errorMsg = new StringBuilder().append("suburb with name [").append(name).append("] not found").toString();
+            	singleSubscriber.onError(new SuburbNotFoundException(errorMsg));
             } else {
             	singleSubscriber.onSuccess(suburbs);
             }
@@ -105,7 +107,7 @@ public class SuburbServiceImpl implements SuburbService {
      * 
      * @return the id of newly added suburb
      * 
-     * @throws EntityExistsException if the suburb already exists
+     * @throws SuburbExistsException if the suburb already exists
      * 
      */
     @Override
@@ -118,7 +120,7 @@ public class SuburbServiceImpl implements SuburbService {
             Optional<Suburb> suburbOptional = suburbRepository.findByNameAndPostcode(suburbWebRequestDTO.getName(), suburbWebRequestDTO.getPostcode());
             // throw error if suburb entry exists already
             if (suburbOptional.isPresent())
-                singleSubscriber.onError(new EntityExistsException());
+                singleSubscriber.onError(new SuburbExistsException());
             else {
             	// create new suburb entry if no entry with same name and post code
                 Long addedSuburbId = suburbRepository.save(toSuburb(suburbWebRequestDTO)).getId();

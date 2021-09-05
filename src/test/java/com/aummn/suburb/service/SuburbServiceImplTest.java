@@ -1,6 +1,8 @@
 package com.aummn.suburb.service;
 
 import com.aummn.suburb.entity.Suburb;
+import com.aummn.suburb.exception.SuburbExistsException;
+import com.aummn.suburb.exception.SuburbNotFoundException;
 import com.aummn.suburb.repo.SuburbRepository;
 import com.aummn.suburb.resource.dto.request.SuburbWebRequestDTO;
 import com.aummn.suburb.service.dto.response.SuburbServiceResponseDTO;
@@ -10,9 +12,6 @@ import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,14 +54,14 @@ public class SuburbServiceImplTest {
     }
 
     @Test
-    public void givenAnExistingSuburb_whenAddSuburb_andWithSamePostcode_thenThrowEntityExistsException() {
+    public void givenAnExistingSuburb_whenAddSuburb_andWithSamePostcode_thenThrowSuburbExistsException() {
         when(suburbRepository.findByNameAndPostcode(anyString(), anyString()))
                 .thenReturn(Optional.of(new Suburb(1L, "Southbank", "3006")));
 
         suburbService.addSuburb(new SuburbWebRequestDTO("Southbank", "3006"))
                 .test()
                 .assertNotComplete()
-                .assertError(EntityExistsException.class)
+                .assertError(SuburbExistsException.class)
                 .awaitTerminalEvent();
 
         InOrder inOrder = inOrder(suburbRepository);
@@ -71,14 +70,14 @@ public class SuburbServiceImplTest {
     }
 
     @Test
-    public void givenAPostcode_whenGetSuburbDetailByPostcode_SuburbNotFound_thenThrowEntityNotFoundException() {
+    public void givenAPostcode_whenGetSuburbDetailByPostcode_SuburbNotFound_thenThrowSuburbNotFoundException() {
         when(suburbRepository.findByPostcode(anyString()))
                 .thenReturn(Collections.emptyList());
 
         suburbService.getSuburbDetailByPostcode("3006")
                 .test()
                 .assertNotComplete()
-                .assertError(EntityNotFoundException.class)
+                .assertError(SuburbNotFoundException.class)
                 .awaitTerminalEvent();
 
         verify(suburbRepository, times(1)).findByPostcode(anyString());
@@ -112,14 +111,14 @@ public class SuburbServiceImplTest {
     }
     
     @Test
-    public void givenASuburbName_whenGetSuburbDetailByName_SuburbNotFound_thenThrowEntityNotFoundException() {
+    public void givenASuburbName_whenGetSuburbDetailByName_SuburbNotFound_thenThrowSuburbNotFoundException() {
         when(suburbRepository.findByName(anyString()))
                 .thenReturn(Collections.emptyList());
 
         suburbService.getSuburbDetailByName("Southbank")
                 .test()
                 .assertNotComplete()
-                .assertError(EntityNotFoundException.class)
+                .assertError(SuburbNotFoundException.class)
                 .awaitTerminalEvent();
 
         verify(suburbRepository, times(1)).findByName(anyString());

@@ -12,8 +12,15 @@ import com.aummn.suburb.resource.dto.response.BaseWebResponse;
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(SuburbNotFoundException.class)
-	public ResponseEntity<BaseWebResponse> handleEntityNotFoundException(SuburbNotFoundException snfe) {
+	public ResponseEntity<BaseWebResponse> handleSuburbNotFoundException(SuburbNotFoundException snfe) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(BaseWebResponse
 				.error(ErrorResponse.builder().status(HttpStatus.NOT_FOUND.value()).message(snfe.getMessage()).build()));
 	}
+	
+	@ExceptionHandler(SuburbExistsException.class)
+	public ResponseEntity<BaseWebResponse> handleSuburbExistsException(SuburbExistsException see) {
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(BaseWebResponse
+				.error(ErrorResponse.builder().status(HttpStatus.CONFLICT.value()).message(see.getMessage()).build()));
+	}
+	
 }
