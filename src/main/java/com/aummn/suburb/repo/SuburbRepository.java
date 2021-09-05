@@ -16,6 +16,8 @@
 package com.aummn.suburb.repo;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.aummn.suburb.entity.Suburb;
 
@@ -27,7 +29,9 @@ import com.aummn.suburb.entity.Suburb;
  */
 public interface SuburbRepository extends JpaRepository<Suburb, Long> {
 
-    List<Suburb> findByPostcode(String postCode);
+    List<Suburb> findByPostcode(String postcode);
 
     List<Suburb> findByName(String name);
+    
+    Optional<Suburb> findByNameAndPostcode(String name, String postcode);
 }
