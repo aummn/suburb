@@ -13,6 +13,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/suburb")
 public class SuburbResource {
-
+    
     @Autowired
     private SuburbService suburbService;
 
@@ -63,13 +65,15 @@ public class SuburbResource {
     	}).collect(Collectors.toList());
     }
     
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(
+    		 value = "/add",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     ) public Single<ResponseEntity<BaseWebResponse>> addSuburb(
         @RequestBody SuburbWebRequest suburbWebRequest) {
         return suburbService.addSuburb(toSuburbServiceRequest(suburbWebRequest)).subscribeOn(Schedulers.io()).map(
-            s -> ResponseEntity.created(URI.create("/api/suburb/" + s))
+            s -> ResponseEntity.created(URI.create("/api/suburb/name/" + suburbWebRequest.getName()))
                 .body(BaseWebResponse.successNoData()));
     }
     

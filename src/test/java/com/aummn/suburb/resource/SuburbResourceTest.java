@@ -1,5 +1,6 @@
 package com.aummn.suburb.resource;
 
+import com.aummn.suburb.SuburbApplication;
 import com.aummn.suburb.exception.SuburbExistsException;
 import com.aummn.suburb.exception.SuburbNotFoundException;
 import com.aummn.suburb.resource.dto.request.SuburbWebRequest;
@@ -8,77 +9,106 @@ import com.aummn.suburb.service.dto.response.SuburbServiceResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Completable;
 import io.reactivex.Single;
+
+import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(SuburbResource.class)
-public class SuburbResourceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes = SuburbApplication.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public class SuburbResourceTest {
+    
     @Autowired
     private ObjectMapper objectMapper;
 
     @MockBean
     private SuburbService suburbService;
 
+    @Autowired
+    private WebApplicationContext context;
+    
+    private MockMvc mockMvc;
+
+    @Before
+    public void setUp() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).dispatchOptions(true).build();
+    }
+
+    
     @Test
+    @WithMockUser(roles = "ADMIN")
     public void givenASuburbRequest_whenAddSuburb_Success_thenReturn201() throws Exception {
         when(suburbService.addSuburb(any()))
                 .thenReturn(Single.just(1L));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/suburb")
+        MvcResult mvcResult = mockMvc.perform(post("/api/suburb/add")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(new SuburbWebRequest())))
+                .andExpect(status().isOk())
                 .andReturn();
 
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.error", nullValue()))
-                .andExpect(jsonPath("$.data", nullValue()));
-
         verify(suburbService, times(1)).addSuburb(any());
+    }
+    
+    @Test
+    @WithMockUser(roles = "NOTADMIN")
+    public void givenASuburbRequest_whenAddSuburb_NotAdminRole_thenReturn403() throws Exception {
+        when(suburbService.addSuburb(any()))
+                .thenReturn(Single.just(1L));
+
+        MvcResult mvcResult = mockMvc.perform(post("/api/suburb/add")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(new SuburbWebRequest())))
+                .andExpect(status().isForbidden())
+                .andReturn();
     }
 
     @Test
-    public void givenASuburbRequest_whenAddSuburb_SuburbExist_thenReturn403SuburbConflicts() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    public void givenASuburbRequest_whenAddSuburb_SuburbExist_thenReturn409SuburbConflicts() throws Exception {
         when(suburbService.addSuburb(any()))
                 .thenReturn(Single.error(new SuburbExistsException()));
 
-        MvcResult mvcResult = mockMvc.perform(post("/api/suburb")
+        MvcResult mvcResult = mockMvc.perform(post("/api/suburb/add")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(new SuburbWebRequest())))
+                .content(objectMapper.writeValueAsString(new SuburbWebRequest("Clayton", "3068"))))              
+                .andExpect(status().isOk())
                 .andReturn();
-
-        mockMvc.perform(asyncDispatch(mvcResult))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error.status", equalTo(HttpStatus.CONFLICT.value())))
-                .andExpect(jsonPath("$.data", nullValue()));
 
         verify(suburbService, times(1)).addSuburb(any());
     }
-
+    
     @Test
     public void givenAPostcode_whenGetSuburbDetailByPostcode_andGetAListOfSuburbDTO_thenReturn200WithSuburbWebResponses() throws Exception {
         
@@ -113,9 +143,9 @@ public class SuburbResourceTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error.status", equalTo(404)))
-                .andExpect(jsonPath("$.error.message", equalTo("suburb with postcode [1] not found")))
-                .andExpect(jsonPath("$.data", nullValue()));
+                .andExpect(jsonPath("$.status", equalTo(404)))
+                .andExpect(jsonPath("$.message", equalTo("suburb with postcode [1] not found")))
+                .andExpect(jsonPath("$.errors", nullValue()));
 
         verify(suburbService, times(1)).getSuburbDetailByPostcode(anyString());
     }
@@ -154,9 +184,9 @@ public class SuburbResourceTest {
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error.status", equalTo(404)))
-                .andExpect(jsonPath("$.error.message", equalTo("suburb with name [Carlton] not found")))
-                .andExpect(jsonPath("$.data", nullValue()));
+                .andExpect(jsonPath("$.status", equalTo(404)))
+                .andExpect(jsonPath("$.message", equalTo("suburb with name [Carlton] not found")))
+                .andExpect(jsonPath("$.errors", nullValue()));
 
         verify(suburbService, times(1)).getSuburbDetailByName(anyString());
     }
