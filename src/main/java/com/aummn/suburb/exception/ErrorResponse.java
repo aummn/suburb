@@ -18,6 +18,5 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
     private int status;
     private String message;
-    private List<String> errors;
 
 }
