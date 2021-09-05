@@ -10,7 +10,37 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SuburbServiceResponseDTO {
-    private long id;
+    private Long id;
     private String name;
     private String postcode;
+    
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final SuburbServiceResponseDTO other = (SuburbServiceResponseDTO) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (postcode == null) {
+            if (other.postcode != null)
+                return false;
+        } else if (!id.equals(other.id) ||
+        		!name.equals(other.name) ||
+        		!postcode.equals(other.postcode)) {
+            return false;
+        } else if (id.equals(other.id) &&
+        		name.equals(other.name) &&
+        		postcode.equals(other.postcode)) {
+            return true;
+        }
+        return false;
+    }
 }
