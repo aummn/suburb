@@ -2,6 +2,7 @@ package com.aummn.suburb.entity;
 
 import javax.persistence.*;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,11 +26,11 @@ public class Suburb {
     @Column(name = "name")
     private String name;
     
-    @Column(name = "postCode")
-    private String postCode;
+    @Column(name = "postcode")
+    private String postcode;
 
-    public Suburb(final String name, final String postCode) {
+    public Suburb(final String name, final String postcode) {
         this.name = name;
-        this.postCode = postCode;
+        this.postcode = postcode;
     }
 }
