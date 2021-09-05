@@ -18,7 +18,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/api/suburb/postcode/**", "/api/suburb/name/**").permitAll().anyRequest().authenticated().and().httpBasic().and().logout().disable().csrf().disable();
+        http.authorizeRequests().antMatchers("/api/suburb/postcode/**", "/api/suburb/name/**", "/api/suburb/id/**").permitAll().anyRequest().authenticated().and().httpBasic().and().logout().disable().csrf().disable();
     }
 
     @Autowired
