@@ -49,4 +49,21 @@ public class SuburbValidatorJUnitParamsTest {
 		FieldValidationResult result = SuburbValidator.validatePostcode(postcode);
 		assertThat(result.isValid()).isEqualTo(isValid);
     }
+    
+    @Test
+    @Parameters({
+            "1000,         true",
+            "20,           true",
+            "10001,        true",
+            "  2000,        true",
+            " 20020,        true",
+            " 20 ,          true",
+            " 2090   ,      true",
+            "-1,            false",
+            "0,             false"
+    })
+	public void shouldReturnSuburbIdIsValid(Long id, boolean isValid) {
+		FieldValidationResult result = SuburbValidator.validateSuburbId(id);
+		assertThat(result.isValid()).isEqualTo(isValid);
+    }
 }

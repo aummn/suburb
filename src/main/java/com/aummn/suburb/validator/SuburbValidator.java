@@ -35,4 +35,13 @@ public class SuburbValidator {
 		String message = isValid ? "" : "post code error";
 		return FieldValidationResult.builder().valid(isValid).message(message).build();
 	}
+	
+	public static FieldValidationResult validateSuburbId(Long id) {
+		boolean isValid = false;
+	    if(id > 0) {
+	      isValid = true;
+	    }
+		String message = isValid ? "" : "id error";
+		return FieldValidationResult.builder().valid(isValid).message(message).build();
+	}
 }
