@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="LOGS" value="./logs" />
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+	    <!-- encoders are assigned the type 'ch.qos.logback.classic.encoder.PatternLayoutEncoder' by default -->
+		<encoder>
+			<pattern>%date{ISO8601} [%yellow(%thread)] %highlight(%-5level) [%cyan(%logger{36})] - %msg %n</pattern>
+		</encoder>
+	</appender>
+
+  	<appender name="dailyRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGS}/suburb-api.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+		    <!-- roll over daily -->
+			<fileNamePattern>${LOGS}/suburb-api-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+			
+			<!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->			
+            <maxFileSize>100MB</maxFileSize>
+			<maxHistory>60</maxHistory>	
+			<totalSizeCap>20GB</totalSizeCap>
+		</rollingPolicy>
+ 
+		<encoder>
+			<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n</Pattern>
+		</encoder> 	    
+  	</appender>
+		
+	<!-- LOG "com.aummn.suburb.resource.*" at INFO level -->
+	<logger name="com.aummn.suburb.resource">
+	    <level value="INFO" />
+		<appender-ref ref="dailyRollingFileAppender"/>
+	</logger>
+
+      <!-- LOG everything at INFO level -->
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="consoleAppender" />
+	</root>
+</configuration> 
