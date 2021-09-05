@@ -1,6 +1,6 @@
 package com.aummn.suburb.service;
 
-import com.aummn.suburb.entity.Suburb;
+import com.aummn.suburb.resource.dto.request.SuburbWebRequestDTO;
 import com.aummn.suburb.service.dto.response.SuburbServiceResponseDTO;
 
 import io.reactivex.Single;
@@ -14,7 +14,7 @@ import java.util.List;
  * 
  */
 public interface SuburbService {
-    Single<String> addSuburb(Suburb suburb);
+    Single<Long> addSuburb(SuburbWebRequestDTO suburbWebRequestDTO);
 
     Single<List<SuburbServiceResponseDTO>> getSuburbDetailByPostcode(String postcode);
 
