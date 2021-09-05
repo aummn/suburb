@@ -52,11 +52,19 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava-reactive-streams</artifactId>
         </dependency>
+        
+        <!-- Testing -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
-        </dependency>        		
+        </dependency>
+	    <dependency>
+	        <groupId>org.junit.vintage</groupId>
+	        <artifactId>junit-vintage-engine</artifactId>
+	        <scope>test</scope>
+	    </dependency>        
+    
 	</dependencies>
 
 	<build>

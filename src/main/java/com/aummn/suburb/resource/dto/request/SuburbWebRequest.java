@@ -1,5 +1,6 @@
 package com.aummn.suburb.resource.dto.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -7,7 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SuburbWebRequestDTO {
+@AllArgsConstructor
+public class SuburbWebRequest {
     private String name;
     private String postcode;
 }
