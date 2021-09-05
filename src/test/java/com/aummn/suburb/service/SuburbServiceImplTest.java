@@ -4,8 +4,9 @@ import com.aummn.suburb.entity.Suburb;
 import com.aummn.suburb.exception.SuburbExistsException;
 import com.aummn.suburb.exception.SuburbNotFoundException;
 import com.aummn.suburb.repo.SuburbRepository;
-import com.aummn.suburb.resource.dto.request.SuburbWebRequestDTO;
-import com.aummn.suburb.service.dto.response.SuburbServiceResponseDTO;
+import com.aummn.suburb.resource.dto.request.SuburbWebRequest;
+import com.aummn.suburb.service.dto.request.SuburbServiceRequest;
+import com.aummn.suburb.service.dto.response.SuburbServiceResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -41,7 +42,7 @@ public class SuburbServiceImplTest {
         when(suburbRepository.save(any(Suburb.class)))
                 .thenReturn(new Suburb(1L, "Southbank", "3006"));
 
-        suburbService.addSuburb(new SuburbWebRequestDTO("Southbank", "3006"))
+        suburbService.addSuburb(new SuburbServiceRequest("Southbank", "3006"))
                 .test()
                 .assertComplete()
                 .assertNoErrors()
@@ -58,7 +59,7 @@ public class SuburbServiceImplTest {
         when(suburbRepository.findByNameAndPostcode(anyString(), anyString()))
                 .thenReturn(Optional.of(new Suburb(1L, "Southbank", "3006")));
 
-        suburbService.addSuburb(new SuburbWebRequestDTO("Southbank", "3006"))
+        suburbService.addSuburb(new SuburbServiceRequest("Southbank", "3006"))
                 .test()
                 .assertNotComplete()
                 .assertError(SuburbExistsException.class)
@@ -90,10 +91,10 @@ public class SuburbServiceImplTest {
         Suburb s3 = new Suburb(3L, "Carlton", "3001");
         List<Suburb> suburbs = Arrays.asList(s1, s2, s3);
         
-        SuburbServiceResponseDTO s1dto = new SuburbServiceResponseDTO(1L, "Southbank", "3006");
-        SuburbServiceResponseDTO s2dto = new SuburbServiceResponseDTO(2L, "Melbourne", "3000");
-        SuburbServiceResponseDTO s3dto = new SuburbServiceResponseDTO(3L, "Carlton", "3001");
-        List<SuburbServiceResponseDTO> dtos = Arrays.asList(s1dto, s2dto, s3dto);
+        SuburbServiceResponse s1dto = new SuburbServiceResponse(1L, "Southbank", "3006");
+        SuburbServiceResponse s2dto = new SuburbServiceResponse(2L, "Melbourne", "3000");
+        SuburbServiceResponse s3dto = new SuburbServiceResponse(3L, "Carlton", "3001");
+        List<SuburbServiceResponse> dtos = Arrays.asList(s1dto, s2dto, s3dto);
         
     	
     	when(suburbRepository.findByPostcode(anyString()))
@@ -131,10 +132,10 @@ public class SuburbServiceImplTest {
         Suburb s3 = new Suburb(3L, "Carlton", "3001");
         List<Suburb> suburbs = Arrays.asList(s1, s2, s3);
         
-        SuburbServiceResponseDTO s1dto = new SuburbServiceResponseDTO(1L, "Southbank", "3006");
-        SuburbServiceResponseDTO s2dto = new SuburbServiceResponseDTO(2L, "Melbourne", "3000");
-        SuburbServiceResponseDTO s3dto = new SuburbServiceResponseDTO(3L, "Carlton", "3001");
-        List<SuburbServiceResponseDTO> dtos = Arrays.asList(s1dto, s2dto, s3dto);
+        SuburbServiceResponse s1dto = new SuburbServiceResponse(1L, "Southbank", "3006");
+        SuburbServiceResponse s2dto = new SuburbServiceResponse(2L, "Melbourne", "3000");
+        SuburbServiceResponse s3dto = new SuburbServiceResponse(3L, "Carlton", "3001");
+        List<SuburbServiceResponse> dtos = Arrays.asList(s1dto, s2dto, s3dto);
         
     	
     	when(suburbRepository.findByName(anyString()))
