@@ -6,6 +6,7 @@ import com.aummn.suburb.resource.dto.response.SuburbWebResponse;
 import com.aummn.suburb.service.SuburbService;
 import com.aummn.suburb.service.dto.request.SuburbServiceRequest;
 import com.aummn.suburb.service.dto.response.SuburbServiceResponse;
+import com.aummn.suburb.validator.SuburbValidator;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
@@ -15,12 +16,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/api/suburb")
@@ -34,7 +38,12 @@ public class SuburbResource {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Single<ResponseEntity<BaseWebResponse<List<SuburbWebResponse>>>> getSuburbDetailByPostcode(@PathVariable(value = "postcode") String postcode) {
-        return suburbService.getSuburbDetailByPostcode(postcode)
+    	boolean isValid = SuburbValidator.validatePostcode(postcode).isValid();
+    	if(!isValid) {
+    		String errorMsg = String.format("invalid postcode - %s",postcode);
+    		throw new IllegalArgumentException(errorMsg);
+    	}
+    	return suburbService.getSuburbDetailByPostcode(postcode)
                 .subscribeOn(Schedulers.io())
                 .map(suburbServiceResponseDTOs -> ResponseEntity.ok(BaseWebResponse.successWithData(toSuburbWebResponses(suburbServiceResponseDTOs))));
     }
@@ -53,6 +62,11 @@ public class SuburbResource {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Single<ResponseEntity<BaseWebResponse<List<String>>>> getSuburbDetailByName(@PathVariable(value = "name") String name) {
+    	boolean isValid = SuburbValidator.validateSuburbName(name).isValid();
+    	if(!isValid) {
+    		String errorMsg = String.format("invalid name - %s",name);
+    		throw new IllegalArgumentException(errorMsg);
+    	}
         return suburbService.getSuburbDetailByName(name)
                 .subscribeOn(Schedulers.io())
                 .map(suburbServiceResponseDTOs -> ResponseEntity.ok(BaseWebResponse.successWithData(toListString(suburbServiceResponseDTOs))));
@@ -71,7 +85,7 @@ public class SuburbResource {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     ) public Single<ResponseEntity<BaseWebResponse>> addSuburb(
-        @RequestBody SuburbWebRequest suburbWebRequest) {
+        @RequestBody @Valid SuburbWebRequest suburbWebRequest) {
         return suburbService.addSuburb(toSuburbServiceRequest(suburbWebRequest)).subscribeOn(Schedulers.io()).map(
             s -> ResponseEntity.created(URI.create("/api/suburb/name/" + suburbWebRequest.getName()))
                 .body(BaseWebResponse.successNoData()));
