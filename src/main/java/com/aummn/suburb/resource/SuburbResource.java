@@ -36,16 +36,6 @@ public class SuburbResource {
                 .subscribeOn(Schedulers.io())
                 .map(suburbServiceResponseDTOs -> ResponseEntity.ok(BaseWebResponse.successWithData(toSuburbWebResponses(suburbServiceResponseDTOs))));
     }
-
-    @GetMapping(
-            value = "/name/{name}",
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public Single<ResponseEntity<BaseWebResponse<List<SuburbWebResponse>>>> getSuburbDetailByName(@PathVariable(value = "name") String name) {
-        return suburbService.getSuburbDetailByName(name)
-                .subscribeOn(Schedulers.io())
-                .map(suburbServiceResponseDTOs -> ResponseEntity.ok(BaseWebResponse.successWithData(toSuburbWebResponses(suburbServiceResponseDTOs))));
-    }
     
     private List<SuburbWebResponse> toSuburbWebResponses(List<SuburbServiceResponse> suburbServiceResponseDTOs) {
     	return suburbServiceResponseDTOs.stream()
@@ -53,6 +43,23 @@ public class SuburbResource {
         	SuburbWebResponse suburbWebResponse = new SuburbWebResponse();
             BeanUtils.copyProperties(dto, suburbWebResponse);
             return suburbWebResponse;
+    	}).collect(Collectors.toList());
+    }
+
+    @GetMapping(
+            value = "/name/{name}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Single<ResponseEntity<BaseWebResponse<List<String>>>> getSuburbDetailByName(@PathVariable(value = "name") String name) {
+        return suburbService.getSuburbDetailByName(name)
+                .subscribeOn(Schedulers.io())
+                .map(suburbServiceResponseDTOs -> ResponseEntity.ok(BaseWebResponse.successWithData(toListString(suburbServiceResponseDTOs))));
+    }
+    
+    private List<String> toListString(List<SuburbServiceResponse> suburbServiceResponseDTOs) {
+    	return suburbServiceResponseDTOs.stream()
+    	.map(dto -> {
+            return dto.getPostcode();
     	}).collect(Collectors.toList());
     }
     
