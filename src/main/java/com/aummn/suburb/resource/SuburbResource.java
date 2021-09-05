@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent;
+
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,11 +102,11 @@ public class SuburbResource {
     ) 
 	@ApiOperation(value = "Create a Suburb entry",
     notes = "return 201 if successfully created")
-    public Single<ResponseEntity<BaseWebResponse>> addSuburb(
+    public Single<ResponseEntity<Void>> addSuburb(
         @RequestBody @Valid SuburbWebRequest suburbWebRequest) {
         return suburbService.addSuburb(toSuburbServiceRequest(suburbWebRequest)).subscribeOn(Schedulers.io()).map(
-            s -> ResponseEntity.created(URI.create("/api/suburb/name/" + suburbWebRequest.getName()))
-                .body(BaseWebResponse.successNoData()));
+            s -> ResponseEntity.created(URI.create("/api/suburb/id/" + s)).build());
+                
     }
     
     private SuburbServiceRequest toSuburbServiceRequest(SuburbWebRequest suburbWebRequest) {

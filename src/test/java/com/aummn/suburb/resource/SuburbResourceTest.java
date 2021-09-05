@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -74,14 +75,13 @@ public class SuburbResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(post("/api/suburb/add")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(new SuburbWebRequest())))
+                .content(objectMapper.writeValueAsString(new SuburbWebRequest("Carlton", "3003"))))
                 .andExpect(status().isOk())
                 .andReturn();
 
         verify(suburbService, times(1)).addSuburb(any());
     }
     
-    @Test
     @WithMockUser(roles = "NOTADMIN")
     public void givenASuburbRequest_whenAddSuburb_NotAdminRole_thenReturn403() throws Exception {
         when(suburbService.addSuburb(any()))
@@ -89,7 +89,7 @@ public class SuburbResourceTest {
 
         MvcResult mvcResult = mockMvc.perform(post("/api/suburb/add")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(objectMapper.writeValueAsString(new SuburbWebRequest())))
+                .content(objectMapper.writeValueAsString(new SuburbWebRequest("Southbank", "3006"))))
                 .andExpect(status().isForbidden())
                 .andReturn();
     }
@@ -120,7 +120,7 @@ public class SuburbResourceTest {
     	when(suburbService.getSuburbDetailByPostcode(anyString()))
                 .thenReturn(Single.just(dtos));
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/postcode/1")
+        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/postcode/1234")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andReturn();
 
@@ -135,17 +135,16 @@ public class SuburbResourceTest {
     @Test
     public void givenAPostcode_whenGetSuburbDetailByPostcode_andPostcodeNotFound_thenReturn404SuburbNotFound() throws Exception {
         when(suburbService.getSuburbDetailByPostcode(anyString()))
-                .thenReturn(Single.error(new SuburbNotFoundException("suburb with postcode [1] not found")));
+                .thenReturn(Single.error(new SuburbNotFoundException("suburb with postcode [1234] not found")));
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/postcode/1")
+        MvcResult mvcResult = mockMvc.perform(get("/api/suburb/postcode/1234")
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andReturn();
 
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", equalTo(404)))
-                .andExpect(jsonPath("$.message", equalTo("suburb with postcode [1] not found")))
-                .andExpect(jsonPath("$.errors", nullValue()));
+                .andExpect(jsonPath("$.message", equalTo("suburb with postcode [1234] not found")));
 
         verify(suburbService, times(1)).getSuburbDetailByPostcode(anyString());
     }
@@ -185,8 +184,7 @@ public class SuburbResourceTest {
         mockMvc.perform(asyncDispatch(mvcResult))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status", equalTo(404)))
-                .andExpect(jsonPath("$.message", equalTo("suburb with name [Carlton] not found")))
-                .andExpect(jsonPath("$.errors", nullValue()));
+                .andExpect(jsonPath("$.message", equalTo("suburb with name [Carlton] not found")));
 
         verify(suburbService, times(1)).getSuburbDetailByName(anyString());
     }
