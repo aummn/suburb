@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "/api/suburb/add",
+			"name": "Add suburb (/api/suburb/add)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -17,7 +17,7 @@
 			"response": []
 		},
 		{
-			"name": "/api/suburb/postcode/",
+			"name": "Get suburb by post code (/api/suburb/postcode/)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -28,7 +28,7 @@
 			"response": []
 		},
 		{
-			"name": "/api/suburb/name",
+			"name": "Get post code by name  (/api/suburb/name)",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -39,7 +39,7 @@
 			"response": []
 		},
 		{
-			"name": "/api/suburb/id/",
+			"name": "Get suburb by Id (/api/suburb/id/)",
 			"request": {
 				"method": "GET",
 				"header": [],
